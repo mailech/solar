@@ -25,13 +25,13 @@
 
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
 }
 
 .stat-card {
     background: var(--bg-card);
-    padding: 32px;
+    padding: 20px;
     border-radius: var(--radius-lg);
     text-align: center;
     box-shadow: var(--shadow);
