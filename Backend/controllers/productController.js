@@ -1,19 +1,14 @@
-const Product = require('../models/Product');
+const { mysqlPool } = require('../config/db');
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
     try {
-        // Fetch products and populate category name if needed
-        const products = await Product.find().populate('category_id', 'name');
-
-        // Transform data to flat structure if frontend expects 'category_name'
-        const data = products.map(product => {
-            const productObj = product.toJSON();
-            productObj.category_name = product.category_id ? product.category_id.name : null;
-            return productObj;
-        });
-
-        res.status(200).json({ success: true, data: data });
+        const [rows] = await mysqlPool.execute(`
+            SELECT p.*, c.name as category_name 
+            FROM products p 
+            LEFT JOIN categories c ON p.category_id = c.id
+        `);
+        res.status(200).json({ success: true, data: rows });
     } catch (error) {
         console.error('Error fetching products:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -24,10 +19,12 @@ exports.getAllProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
     const { title, price, capacity, category_id, image_url, tag, description, features } = req.body;
     try {
-        const product = await Product.create({
-            title, price, capacity, category_id, image_url, tag, description, features
-        });
-        res.status(201).json({ success: true, data: product });
+        const sql = `INSERT INTO products (title, price, capacity, category_id, image_url, tag, description, features) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
+        const featuresJson = JSON.stringify(features || []);
+        const [result] = await mysqlPool.execute(sql, [title, price, capacity, category_id, image_url, tag, description, featuresJson]);
+
+        const newProduct = { id: result.insertId, title, price, capacity, category_id, image_url, tag, description, features };
+        res.status(201).json({ success: true, data: newProduct });
     } catch (error) {
         console.error('Error creating product:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -37,7 +34,7 @@ exports.createProduct = async (req, res) => {
 // Delete product
 exports.deleteProduct = async (req, res) => {
     try {
-        await Product.findByIdAndDelete(req.params.id);
+        await mysqlPool.execute('DELETE FROM products WHERE id = ?', [req.params.id]);
         res.status(200).json({ success: true, message: 'Product deleted' });
     } catch (error) {
         console.error('Error deleting product:', error);

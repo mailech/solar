@@ -1,11 +1,11 @@
-const Project = require('../models/Project');
+const { mysqlPool } = require('../config/db');
 
 exports.getAllProjects = async (req, res) => {
     try {
-        const projects = await Project.find();
+        const [rows] = await mysqlPool.execute('SELECT * FROM projects');
         res.status(200).json({
             success: true,
-            data: projects
+            data: rows
         });
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -18,13 +18,13 @@ exports.getAllProjects = async (req, res) => {
 
 exports.getProjectById = async (req, res) => {
     try {
-        const project = await Project.findById(req.params.id);
-        if (!project) {
+        const [rows] = await mysqlPool.execute('SELECT * FROM projects WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Project not found' });
         }
         res.status(200).json({
             success: true,
-            data: project
+            data: rows[0]
         });
     } catch (error) {
         console.error('Error fetching project:', error);
@@ -40,18 +40,27 @@ exports.createProject = async (req, res) => {
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
-        // Map category to 'type' if needed, or stick to the schema
-        const project = await Project.create({
-            title, location, system_size: capacity, // Mapping capacity to system_size as per schema
-            type: category || 'Residential', // Default to Residential if not provided
-            image_url: image_url || '',
-            description
-            // Note: co2_offset and homes_powered are not in the Project Schema I created, 
-            // I should update the schema if these fields are critical, or just not save them for now.
-            // For now, I will save only what is in schema + strict mode will ignore others unless I add them.
-        });
+        // Map fields to match schema.sql structure
+        // Schema has: title, location, category, capacity, completion_date, image_url, description, co2_offset, homes_powered
+        const sql = `INSERT INTO projects (title, location, category, capacity, completion_date, image_url, description, co2_offset, homes_powered) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-        res.status(201).json({ success: true, data: project });
+        const [result] = await mysqlPool.execute(sql, [
+            title,
+            location,
+            category || 'Residential',
+            capacity,
+            completion_date,
+            image_url,
+            description,
+            co2_offset,
+            homes_powered
+        ]);
+
+        const newProject = {
+            id: result.insertId, title, location, category, capacity, completion_date, image_url, description, co2_offset, homes_powered
+        };
+
+        res.status(201).json({ success: true, data: newProject });
     } catch (error) {
         console.error('Error creating project:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -60,7 +69,7 @@ exports.createProject = async (req, res) => {
 
 exports.deleteProject = async (req, res) => {
     try {
-        await Project.findByIdAndDelete(req.params.id);
+        await mysqlPool.execute('DELETE FROM projects WHERE id = ?', [req.params.id]);
         res.status(200).json({ success: true, message: 'Project deleted' });
     } catch (error) {
         console.error('Error deleting project:', error);

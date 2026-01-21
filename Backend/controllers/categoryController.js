@@ -1,10 +1,10 @@
-const Category = require('../models/Category');
+const { mysqlPool } = require('../config/db');
 
 // Get all categories
 exports.getAllCategories = async (req, res) => {
     try {
-        const categories = await Category.find();
-        res.status(200).json({ success: true, data: categories });
+        const [rows] = await mysqlPool.execute('SELECT * FROM categories');
+        res.status(200).json({ success: true, data: rows });
     } catch (error) {
         console.error('Error fetching categories:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -15,8 +15,8 @@ exports.getAllCategories = async (req, res) => {
 exports.createCategory = async (req, res) => {
     const { name, description } = req.body;
     try {
-        const category = await Category.create({ name, description });
-        res.status(201).json({ success: true, data: category });
+        const [result] = await mysqlPool.execute('INSERT INTO categories (name, description) VALUES (?, ?)', [name, description]);
+        res.status(201).json({ success: true, data: { id: result.insertId, name, description } });
     } catch (error) {
         console.error('Error creating category:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -26,7 +26,7 @@ exports.createCategory = async (req, res) => {
 // Delete category
 exports.deleteCategory = async (req, res) => {
     try {
-        await Category.findByIdAndDelete(req.params.id);
+        await mysqlPool.execute('DELETE FROM categories WHERE id = ?', [req.params.id]);
         res.status(200).json({ success: true, message: 'Category deleted' });
     } catch (error) {
         console.error('Error deleting category:', error);
