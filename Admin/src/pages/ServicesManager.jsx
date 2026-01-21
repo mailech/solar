@@ -7,7 +7,9 @@ import { toast } from 'react-toastify';
 const ServicesManager = () => {
     const [services, setServices] = useState([]);
     const [showModal, setShowModal] = useState(false);
-    const [formData, setFormData] = useState({ title: '', description: '', icon: '', category: 'core', link: '#' });
+    const [formData, setFormData] = useState({
+        title: '', description: '', icon: 'Zap', category: 'residential', link: '/services'
+    });
 
     useEffect(() => {
         fetchServices();
@@ -25,8 +27,9 @@ const ServicesManager = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this service?')) {
             try {
-                // await axios.delete(`http://localhost:5000/api/services/${id}`); // Need to implement delete in backend if not exists
-                toast.info('Delete functionality to be implemented in backend');
+                await axios.delete(`http://localhost:5000/api/services/${id}`);
+                toast.success('Service deleted');
+                fetchServices();
             } catch (error) {
                 toast.error('Failed to delete service');
             }
@@ -36,9 +39,11 @@ const ServicesManager = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // await axios.post('http://localhost:5000/api/services', formData); // Need to implement create in backend
-            toast.info('Create functionality to be implemented in backend');
+            await axios.post('http://localhost:5000/api/services', formData);
+            toast.success('Service added');
             setShowModal(false);
+            fetchServices();
+            setFormData({ title: '', description: '', icon: 'Zap', category: 'residential', link: '/services' });
         } catch (error) {
             toast.error('Failed to add service');
         }
@@ -48,47 +53,99 @@ const ServicesManager = () => {
         <Layout>
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Services</h2>
-                    <p className="text-gray-500">Manage offered services</p>
+                    <h2 className="text-2xl font-bold text-text-main">Services</h2>
+                    <p className="text-text-muted">Manage your service offerings</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-primary hover:bg-secondary text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+                    className="bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 text-[var(--color-background)] px-5 py-2.5 rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-xl font-medium"
                 >
                     <Plus size={20} /> Add Service
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {services.map(service => (
-                    <div key={service.id} className="bg-white p-6 rounded-xl shadow-sm border hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start mb-4">
-                            <div className="p-3 bg-blue-50 text-primary rounded-lg">
-                                <Zap size={24} />
-                            </div>
-                            <div className="flex gap-2">
-                                <button className="text-gray-400 hover:text-blue-500"><Edit2 size={18} /></button>
-                                <button onClick={() => handleDelete(service.id)} className="text-gray-400 hover:text-red-500"><Trash2 size={18} /></button>
-                            </div>
-                        </div>
-                        <h3 className="text-lg font-bold text-gray-800 mb-2">{service.title}</h3>
-                        <p className="text-gray-600 text-sm">{service.description}</p>
-                        <div className="mt-4 pt-4 border-t flex justify-between items-center text-sm">
-                            <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded">{service.category}</span>
-                        </div>
-                    </div>
-                ))}
+            <div className="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-[var(--color-background)] border-b border-border">
+                        <tr>
+                            <th className="p-5 font-semibold text-text-muted">Icon</th>
+                            <th className="p-5 font-semibold text-text-muted">Title</th>
+                            <th className="p-5 font-semibold text-text-muted">Category</th>
+                            <th className="p-5 font-semibold text-text-muted">Description</th>
+                            <th className="p-5 text-right font-semibold text-text-muted">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                        {services.length === 0 ? (
+                            <tr><td colSpan="5" className="p-8 text-center text-text-muted">No services found.</td></tr>
+                        ) : (
+                            services.map(service => (
+                                <tr key={service.id} className="hover:bg-[var(--color-background)]/50 transition-colors">
+                                    <td className="p-5">
+                                        <div className="w-10 h-10 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-lg flex items-center justify-center">
+                                            <Zap size={20} />
+                                        </div>
+                                    </td>
+                                    <td className="p-5 font-medium text-text-main">{service.title}</td>
+                                    <td className="p-5 text-text-muted capitalize">{service.category}</td>
+                                    <td className="p-5 text-text-muted max-w-xs truncate">{service.description}</td>
+                                    <td className="p-5 text-right flex justify-end items-center h-full pt-6">
+                                        <button className="text-blue-500 hover:text-blue-600 mx-1 p-2 hover:bg-blue-500/10 rounded-lg transition-colors"><Edit2 size={18} /></button>
+                                        <button onClick={() => handleDelete(service.id)} className="text-red-500 hover:text-red-600 mx-1 p-2 hover:bg-red-500/10 rounded-lg transition-colors"><Trash2 size={18} /></button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
             </div>
 
-            {/* Modal - Placeholder for now */}
+            {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-                        <h3 className="text-xl font-bold mb-4">Add Service</h3>
-                        <p className="text-gray-500 mb-4">Backend support for adding services is pending implementation.</p>
-                        <div className="flex justify-end">
-                            <button onClick={() => setShowModal(false)} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">Close</button>
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-border animate-in fade-in zoom-in duration-200">
+                        <div className="p-6 border-b border-border flex justify-between items-center bg-[var(--color-background)]">
+                            <h3 className="text-xl font-bold text-text-main">Add Service</h3>
+                            <button onClick={() => setShowModal(false)} className="text-text-muted hover:text-text-main transition-colors text-2xl">&times;</button>
                         </div>
+                        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+                            <div>
+                                <label className="block text-sm font-medium text-text-main mb-2">Service Title</label>
+                                <input
+                                    type="text"
+                                    required
+                                    className="w-full bg-[var(--color-background)] border border-border rounded-xl px-4 py-3 text-text-main focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent outline-none transition-all"
+                                    value={formData.title}
+                                    placeholder="e.g. Roof Installation"
+                                    onChange={e => setFormData({ ...formData, title: e.target.value })}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-main mb-2">Category</label>
+                                <select
+                                    className="w-full bg-[var(--color-background)] border border-border rounded-xl px-4 py-3 text-text-main focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent outline-none transition-all"
+                                    value={formData.category}
+                                    onChange={e => setFormData({ ...formData, category: e.target.value })}
+                                >
+                                    <option value="residential">Residential</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="industrial">Industrial</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-text-main mb-2">Description</label>
+                                <textarea
+                                    className="w-full bg-[var(--color-background)] border border-border rounded-xl px-4 py-3 text-text-main focus:ring-2 focus:ring-[var(--color-secondary)] focus:border-transparent outline-none transition-all"
+                                    rows="3"
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                ></textarea>
+                            </div>
+                            <div className="flex gap-3 justify-end pt-2">
+                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:bg-[var(--color-background)] rounded-xl transition-colors font-medium">Cancel</button>
+                                <button type="submit" className="px-5 py-2.5 bg-[var(--color-secondary)] hover:bg-[var(--color-accent)] text-white rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-[1.02] font-medium">Create Service</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

@@ -3,49 +3,82 @@
 @source "./src/**/*.{js,ts,jsx,tsx}";
 
 @theme {
-  /* Common Token Definitions if needed */
+  --color-surface: var(--color-surface);
+  --color-background: var(--color-background);
+  --color-primary: var(--color-primary);
+  --color-secondary: var(--color-secondary);
+  --color-accent: var(--color-accent);
+  --color-text-main: var(--color-text-main);
+  --color-text-muted: var(--color-text-muted);
+  --color-border: var(--color-border);
+  --color-border-hover: var(--color-border-hover);
 }
 
 :root {
-  /* Light Theme (Default) */
-  --color-primary: #0F172A;
+  /* Light Theme (Zinc) */
+  --color-primary: #18181b;
+  /* Zinc 900 */
   --color-secondary: #00D084;
-  --color-accent: #00D084;
-  --color-background: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-text-main: #0F172A;
-  --color-text-muted: #64748B;
-  --color-border: #E2E8F0;
+  --color-accent: #10b981;
+  /* Emerald 500 */
+
+  --color-background: #fafafa;
+  /* Zinc 50 */
+  --color-surface: #ffffff;
+  /* White */
+
+  --color-text-main: #18181b;
+  /* Zinc 900 */
+  --color-text-muted: #71717a;
+  /* Zinc 500 */
+
+  --color-border: #e4e4e7;
+  /* Zinc 200 */
+  --color-border-hover: #d4d4d8;
+  /* Zinc 300 */
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e4e4e7;
 }
 
 .dark {
-  /* Dark Theme Override - Professional Brand Match */
-  --color-primary: #00D084;
+  /* Dark Theme (Deep Zinc) */
+  --color-primary: #f4f4f5;
+  /* Zinc 100 */
   --color-secondary: #00D084;
-  --color-accent: #0FB981;
+  --color-accent: #34d399;
+  /* Emerald 400 */
 
-  /* Gradient Bases */
-  --color-background: #02040a;
-  /* Almost Black Base */
-  --color-surface: #0B1C3E;
-  /* Brand Dark Blue Tint */
+  --color-background: #09090b;
+  /* Zinc 950 */
+  --color-surface: #18181b;
+  /* Zinc 900 */
 
-  /* Text */
   --color-text-main: #ffffff;
-  --color-text-muted: #94a3b8;
+  /* White */
+  --color-text-muted: #a1a1aa;
+  /* Zinc 400 */
 
-  /* Subtle Borders */
-  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border: #27272a;
+  /* Zinc 800 */
+  --color-border-hover: #3f3f46;
+  /* Zinc 700 */
+
+  --sidebar-bg: rgba(24, 24, 27, 0.6);
+  /* Zinc 900 with opacity */
+  --sidebar-border: #27272a;
 }
 
 body {
   background-color: var(--color-background);
-  /* Professional Deep Gradient Background */
-  background-image:
-    radial-gradient(at 0% 0%, rgba(11, 28, 62, 0.25) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(0, 208, 132, 0.05) 0px, transparent 50%);
-  background-attachment: fixed;
   color: var(--color-text-main);
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.3s, color 0.3s;
+}
+
+/* Custom Utilities for smooth transitions */
+.transition-theme {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }

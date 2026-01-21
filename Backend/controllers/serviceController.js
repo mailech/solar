@@ -1,11 +1,11 @@
-const db = require('../config/db');
+const Service = require('../models/Service');
 
 exports.getAllServices = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM services');
+        const services = await Service.find();
         res.status(200).json({
             success: true,
-            data: rows
+            data: services
         });
     } catch (error) {
         console.error('Error fetching services:', error);
@@ -18,13 +18,13 @@ exports.getAllServices = async (req, res) => {
 
 exports.getServiceById = async (req, res) => {
     try {
-        const [rows] = await db.query('SELECT * FROM services WHERE id = ?', [req.params.id]);
-        if (rows.length === 0) {
+        const service = await Service.findById(req.params.id);
+        if (!service) {
             return res.status(404).json({ success: false, message: 'Service not found' });
         }
         res.status(200).json({
             success: true,
-            data: rows[0]
+            data: service
         });
     } catch (error) {
         console.error('Error fetching service:', error);
@@ -38,11 +38,10 @@ exports.getServiceById = async (req, res) => {
 exports.createService = async (req, res) => {
     const { title, description, icon, category, link } = req.body;
     try {
-        const [result] = await db.query(
-            'INSERT INTO services (title, description, icon, category, link) VALUES (?, ?, ?, ?, ?)',
-            [title, description, icon, category, link]
-        );
-        res.status(201).json({ success: true, data: { id: result.insertId, ...req.body } });
+        const service = await Service.create({
+            title, description, icon, category, link
+        });
+        res.status(201).json({ success: true, data: service });
     } catch (error) {
         console.error('Error creating service:', error);
         res.status(500).json({ success: false, message: 'Server Error' });
@@ -51,7 +50,7 @@ exports.createService = async (req, res) => {
 
 exports.deleteService = async (req, res) => {
     try {
-        await db.query('DELETE FROM services WHERE id = ?', [req.params.id]);
+        await Service.findByIdAndDelete(req.params.id);
         res.status(200).json({ success: true, message: 'Service deleted' });
     } catch (error) {
         console.error('Error deleting service:', error);

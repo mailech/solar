@@ -1,28 +1,16 @@
-const mysql = require('mysql2');
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'solar_db',
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
-
-const promisePool = pool.promise();
-
-// Test the connection
-pool.getConnection((err, connection) => {
-    if (err) {
-        console.error('Database connection failed:', err.code, err.message);
-    } else {
-        console.log('Connected to MySQL Database');
-        connection.release();
+const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/solar_db');
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        process.exit(1);
     }
-});
+};
 
-module.exports = promisePool;
+module.exports = connectDB;

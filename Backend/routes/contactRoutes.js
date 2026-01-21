@@ -12,5 +12,7 @@ const contactValidation = [
 ];
 
 router.post('/', contactValidation, contactController.submitContactForm);
+router.get('/', contactController.getAllInquiries);
+router.delete('/:id', contactController.deleteInquiry);
 
 module.exports = router;
