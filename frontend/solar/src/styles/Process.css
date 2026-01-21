@@ -108,8 +108,7 @@
 }
 
 @media (max-width: 768px) {
-    .process-steps {
-        flex-direction: column;
-        align-items: center;
+    .home-process-section {
+        display: none !important;
     }
 }
