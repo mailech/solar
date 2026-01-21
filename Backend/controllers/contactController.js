@@ -11,13 +11,20 @@ exports.submitContactForm = async (req, res) => {
     const { fullName, email, subject, message } = req.body;
 
     try {
-        const sql = 'INSERT INTO contacts (full_name, email, subject, message) VALUES (?, ?, ?, ?)';
-        const [result] = await db.execute(sql, [fullName, email, subject, message]);
+        const Inquiry = require('../models/Inquiry');
+        const newInquiry = new Inquiry({
+            fullName,
+            email,
+            subject,
+            message
+        });
+
+        await newInquiry.save();
 
         res.status(201).json({
             success: true,
             message: 'Contact form submitted successfully',
-            data: { id: result.insertId, fullName, email, subject, message }
+            data: newInquiry
         });
     } catch (error) {
         console.error('Error submitting contact form:', error);
@@ -25,5 +32,34 @@ exports.submitContactForm = async (req, res) => {
             success: false,
             message: 'Server Error submitting contact form'
         });
+    }
+};
+
+exports.getAllInquiries = async (req, res) => {
+    try {
+        const Inquiry = require('../models/Inquiry'); // Ensure model is imported preferably top-level but here for minimal diff context if needed, better to move to top
+        // Actually, let's just use the Inquiry model directly. 
+        // Wait, the previous code used `db.execute` which implies MySQL but we switched to Mongoose.
+        // I need to check if Inquiry model is being used. 
+        // The current file doesn't import the model properly. 
+        // Use the existing Mongoose pattern.
+
+        const Inquiry = require('../models/Inquiry');
+        const inquiries = await Inquiry.find().sort({ createdAt: -1 });
+        res.json(inquiries);
+    } catch (error) {
+        console.error('Error fetching inquiries:', error);
+        res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+exports.deleteInquiry = async (req, res) => {
+    try {
+        const Inquiry = require('../models/Inquiry');
+        await Inquiry.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Inquiry deleted' });
+    } catch (error) {
+        console.error('Error deleting inquiry:', error);
+        res.status(500).json({ message: 'Server Error' });
     }
 };

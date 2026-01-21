@@ -30,6 +30,7 @@ app.use('/api/testimonials', require('./routes/testimonialRoutes'));
 app.use('/api/contact', require('./routes/contactRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/categories', require('./routes/categoryRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {
